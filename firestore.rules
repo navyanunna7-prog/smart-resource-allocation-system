@@ -1,0 +1,48 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function isSignedIn() { return request.auth != null; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // Volunteer validation
+    function isValidVolunteer(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.phone is string && data.phone.size() >= 10 &&
+             data.email is string && data.email.matches('^.+@.+\\..+$') &&
+             data.location is string && data.location.size() > 0 &&
+             data.availability in ['Available', 'Busy'];
+    }
+
+    match /volunteers/{volunteerId} {
+      allow create: if isValidId(volunteerId) && isValidVolunteer(incoming());
+      allow read: if true; 
+      allow update, delete: if false; 
+    }
+
+    // Need validation
+    function isValidNeed(data) {
+      return data.name is string && data.name.size() > 0 &&
+             data.phone is string &&
+             data.location is string &&
+             data.description is string &&
+             data.ngoUrgency in ['LOW', 'MEDIUM', 'HIGH'] &&
+             data.predictedUrgency in ['LOW', 'MEDIUM', 'HIGH'] &&
+             data.createdAt is timestamp;
+    }
+
+    match /needs/{needId} {
+      allow create: if isValidId(needId) && isValidNeed(incoming());
+      allow read: if true;
+      allow update: if false; 
+      allow delete: if false;
+    }
+  }
+}

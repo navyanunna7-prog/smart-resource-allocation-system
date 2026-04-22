@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "volunteer": {
+      "title": "Volunteer",
+      "description": "A volunteer ready to help in community needs.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "location": { "type": "string" },
+        "availability": { "type": "string", "enum": ["Available", "Busy"] }
+      },
+      "required": ["name", "phone", "email", "location", "availability"]
+    },
+    "need": {
+      "title": "Community Need",
+      "description": "A community problem report.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "location": { "type": "string" },
+        "description": { "type": "string" },
+        "ngoUrgency": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+        "predictedUrgency": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+        "assignedVolunteers": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "phone", "location", "description", "ngoUrgency", "predictedUrgency", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/volunteers/{volunteerId}": {
+      "schema": "volunteer",
+      "description": "Collection of registered volunteers."
+    },
+    "/needs/{needId}": {
+      "schema": "need",
+      "description": "Collection of reported community needs."
+    }
+  }
+}
